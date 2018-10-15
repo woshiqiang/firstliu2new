@@ -37,8 +37,11 @@ public class TcpClient implements Runnable {
 
     public void send(String action, String msg) {
         this.action = action;
-        pw.println(msg);
-        pw.flush();
+        if (pw!=null){
+            pw.println(msg);
+            pw.flush();
+        }
+
     }
 
     @Override
@@ -65,7 +68,7 @@ public class TcpClient implements Runnable {
                 if (rcvMsg.equals("QuitClient")) {   //服务器要求客户端结束
                     isRun = false;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
