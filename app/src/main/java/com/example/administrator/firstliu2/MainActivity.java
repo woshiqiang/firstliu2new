@@ -2,155 +2,194 @@ package com.example.administrator.firstliu2;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Message;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
+/**
+ * @Date 2018-10-15.
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private Button button1;
-    private Button button2;
-    private Button button3;
-    private Button button4;
-    private Button button5;
-    private Button button6;
-    private Button button7;
-    private TextView textView2;
-    private TextView textView3;
-
-    private final MyHandler myHandler = new MyHandler(this);
-    private MyBroadcastReceiver myBroadcastReceiver = new MyBroadcastReceiver();
-    private TcpClient tcpClient;
-    ExecutorService exec = Executors.newCachedThreadPool();
+    private AppCompatButton btn_aware;
+    private AppCompatButton btn_sleep;
+    private AppCompatButton btn_add_pre_temp;
+    private AppCompatButton btn_sub_temp;
+    private AppCompatButton btn_state;
+    private AppCompatButton btn_trouble;
+    private TextView tv_pre_temp;
+    private TextView tv_temp;
+    private TextView tv_tds;
+    private TextView tv_level;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main2);
         initView();
         bindReceiver();
-
-        tcpClient = new TcpClient(this, "47.100.241.170", 2333);
-        exec.execute(tcpClient);
 
     }
 
     private void initView() {
-        button1 = (Button) findViewById(R.id.button1);
-        button2 = (Button) findViewById(R.id.button2);
-        button3 = (Button) findViewById(R.id.button3);
-        button4 = (Button) findViewById(R.id.button4);
-        button5 = (Button) findViewById(R.id.button5);
-        button6 = (Button) findViewById(R.id.button6);
-        button7 = (Button) findViewById(R.id.button7);
-        textView2 = (TextView) findViewById(R.id.textView2);
-        textView3 = (TextView) findViewById(R.id.textView3);
+        btn_aware = (AppCompatButton) findViewById(R.id.btn_aware);
+        btn_sleep = (AppCompatButton) findViewById(R.id.btn_sleep);
+        btn_add_pre_temp = (AppCompatButton) findViewById(R.id.btn_add_pre_temp);
+        btn_sub_temp = (AppCompatButton) findViewById(R.id.btn_sub_pre_temp);
+        btn_state = (AppCompatButton) findViewById(R.id.btn_state);
+        btn_trouble = (AppCompatButton) findViewById(R.id.btn_trouble);
+        tv_pre_temp = (TextView) findViewById(R.id.tv_pre_temp);
+        tv_temp = (TextView) findViewById(R.id.tv_temp);
+        tv_tds = (TextView) findViewById(R.id.tv_tds);
+        tv_level = (TextView) findViewById(R.id.tv_level);
 
-        button1.setOnClickListener(this);
-        button2.setOnClickListener(this);
-        button3.setOnClickListener(this);
-        button4.setOnClickListener(this);
-        button5.setOnClickListener(this);
-        button6.setOnClickListener(this);
-        button7.setOnClickListener(this);
+        btn_aware.setOnClickListener(this);
+        btn_sleep.setOnClickListener(this);
+        btn_add_pre_temp.setOnClickListener(this);
+        btn_sub_temp.setOnClickListener(this);
+        btn_state.setOnClickListener(this);
+        btn_trouble.setOnClickListener(this);
     }
 
     private void bindReceiver() {
-        IntentFilter intentFilter = new IntentFilter("tcpClientReceiver");
-        registerReceiver(myBroadcastReceiver, intentFilter);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constants.ACTION_AWARE);
+        intentFilter.addAction(Constants.ACTION_SLEEP);
+        intentFilter.addAction(Constants.ACTION_ADD_PRE_TEMP);
+        intentFilter.addAction(Constants.ACTION_SUB_PRE_TEMP);
+        intentFilter.addAction(Constants.ACTION_GET_INFO);
+        intentFilter.addAction(Constants.ACTION_STATE);
+        intentFilter.addAction(Constants.ACTION_REPORT_TROUBLE);
+
+        registerReceiver(new MyBroadcastReceiver(), intentFilter);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.button1:
-
+            case R.id.btn_aware:
+                aware();
                 break;
-            case R.id.button2:
-                final String cmd = "\"appCmdCode\":1";
-                Message message = Message.obtain();
-                message.what = 2;
-                message.obj = cmd;
-                myHandler.sendMessage(message);
-                //降低预热
-                exec.execute(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        tcpClient.send(cmd);
-                    }
-                });
+            case R.id.btn_sleep:
+                sleep();
                 break;
-            case R.id.button3:
-
+            case R.id.btn_add_pre_temp:
+                addPreTemp();
                 break;
-            case R.id.button4:
-
+            case R.id.btn_sub_pre_temp:
+                subPreTemp();
                 break;
-            case R.id.button5:
-
+            case R.id.btn_state:
+                getState();
                 break;
-            case R.id.button6:
-
-                break;
-            case R.id.button7:
-
+            case R.id.btn_trouble:
+                reportTrouble();
                 break;
         }
+    }
+
+    /**
+     * 上报维修
+     */
+    private void reportTrouble() {
+        final View view = View.inflate(this, R.layout.view_dialog, null);
+        final EditText et_dialog_trouble = view.findViewById(R.id.et_dialog_trouble);
+        new AlertDialog.Builder(this)
+                .setTitle("上报维修")//提示框标题
+                .setView(view)
+                .setPositiveButton("确定",//提示框的两个按钮
+                        new android.content.DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //故障内容
+                                String content = et_dialog_trouble.getText().toString();
+                                String cmd = "\"appCmdCode1\":5,\"appCmdCode2\":5,\"errorReport\":\"" + content + "\"";
+                                MyApplication.tcpClient.send(Constants.ACTION_REPORT_TROUBLE, cmd);
+                            }
+                        })
+                .setNegativeButton("取消", null)
+                .create()
+                .show();
+
+    }
+
+    /**
+     * 获取热水器的最新状态
+     */
+    private void getState() {
+        String cmd = "\"appCmdCode1\":2,\"appCmdCode2\":2";
+        MyApplication.tcpClient.send(Constants.ACTION_STATE, cmd);
+    }
+
+    /**
+     * 降低预设水温
+     */
+    private void subPreTemp() {
+        String cmd = "\"appCmdCode1\":1,\"appCmdCode2\":1";
+        MyApplication.tcpClient.send(Constants.ACTION_SUB_PRE_TEMP, cmd);
+    }
+
+    /**
+     * 提高预设水温
+     */
+    private void addPreTemp() {
+        String cmd = "\"appCmdCode1\":0,\"appCmdCode2\":0";
+        MyApplication.tcpClient.send(Constants.ACTION_ADD_PRE_TEMP, cmd);
+    }
+
+    /**
+     * 让热水器进入睡眠模式
+     */
+    private void sleep() {
+        String cmd = "\"appCmdCode1\":3,\"appCmdCode2\":3";
+        MyApplication.tcpClient.send(Constants.ACTION_SLEEP, cmd);
+    }
+
+    /**
+     * 5. 唤醒热水器
+     */
+    private void aware() {
+        String cmd = "\"appCmdCode1\":4,\"appCmdCode2\":4";
+        MyApplication.tcpClient.send(Constants.ACTION_AWARE, cmd);
     }
 
     private class MyBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            String msg = intent.getStringExtra(Constants.RECEIVE_MSG);
+            Log.d("MyBroadcastReceiver", "onReceive:" + msg);
             String mAction = intent.getAction();
             switch (mAction) {
-                case "tcpClientReceiver":
-                    String msg = intent.getStringExtra("tcpClientReceiver");
-                    Message message = Message.obtain();
-                    message.what = 1;
-                    message.obj = msg;
-                    myHandler.sendMessage(message);
+                case Constants.ACTION_AWARE:
+                    Toast.makeText(MainActivity.this, "唤醒：" + msg, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.ACTION_SLEEP:
+                    Toast.makeText(MainActivity.this, "睡眠：" + msg, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.ACTION_ADD_PRE_TEMP:
+                    Toast.makeText(MainActivity.this, "提高预设温度：" + msg, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.ACTION_SUB_PRE_TEMP:
+                    Toast.makeText(MainActivity.this, "降低预设温度：" + msg, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.ACTION_STATE:
+                    Toast.makeText(MainActivity.this, "最新状态：" + msg, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.ACTION_REPORT_TROUBLE:
+                    Toast.makeText(MainActivity.this, "上报维修：" + msg, Toast.LENGTH_SHORT).show();
                     break;
             }
         }
     }
 
-    private class MyHandler extends android.os.Handler {
-        private WeakReference<MainActivity> mActivity;
 
-        MyHandler(MainActivity activity) {
-            mActivity = new WeakReference<MainActivity>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (mActivity != null) {
-                switch (msg.what) {
-                    case 1:
-                        Toast.makeText(MainActivity.this, "接收到消息:" + msg.obj, Toast.LENGTH_SHORT).show();
-                        break;
-                    case 2:
-                        Toast.makeText(MainActivity.this, "发送消息:" + msg.obj, Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (tcpClient != null)
-            tcpClient.closeSelf();
-    }
 }
