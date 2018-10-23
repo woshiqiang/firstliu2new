@@ -16,6 +16,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.administrator.firstliu2.bean.CommonResult;
+import com.example.administrator.firstliu2.bean.ResultStatus;
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+
 /**
  * @Date 2018-10-15.
  */
@@ -102,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void reportTrouble() {
         final View view = View.inflate(this, R.layout.view_dialog, null);
+        final EditText et_dialog_location = view.findViewById(R.id.et_dialog_location);
         final EditText et_dialog_trouble = view.findViewById(R.id.et_dialog_trouble);
         new AlertDialog.Builder(this)
                 .setTitle("上报维修")//提示框标题
@@ -110,10 +117,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         new android.content.DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //故障内容
-                                String content = et_dialog_trouble.getText().toString();
-                                String cmd = "\"appCmdCode1\":5,\"appCmdCode2\":5,\"errorReport\":\"" + content + "\"";
-                                MyApplication.tcpClient.send(Constants.ACTION_REPORT_TROUBLE, cmd);
+                                String location = et_dialog_location.getText().toString();//位置
+                                String content = et_dialog_trouble.getText().toString();//故障内容
+                                HashMap<String, Object> map = new HashMap<>();
+                                map.put("appCmdCode1", 5);
+                                map.put("appCmdCode2", 5);
+                                map.put("errorReport", content);
+                                map.put("location", location);
+                                Gson gson = new Gson();
+                                String json = gson.toJson(map);
+                                MyApplication.tcpClient.send(Constants.ACTION_REPORT_TROUBLE, json);
                             }
                         })
                 .setNegativeButton("取消", null)
@@ -126,40 +139,61 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 获取热水器的最新状态
      */
     private void getState() {
-        String cmd = "\"appCmdCode1\":2,\"appCmdCode2\":2";
-        MyApplication.tcpClient.send(Constants.ACTION_STATE, cmd);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("appCmdCode1", 2);
+        map.put("appCmdCode2", 2);
+        Gson gson = new Gson();
+        String json = gson.toJson(map);
+        MyApplication.tcpClient.send(Constants.ACTION_STATE, json);
     }
 
     /**
      * 降低预设水温
      */
     private void subPreTemp() {
-        String cmd = "\"appCmdCode1\":1,\"appCmdCode2\":1";
-        MyApplication.tcpClient.send(Constants.ACTION_SUB_PRE_TEMP, cmd);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("appCmdCode1", 1);
+        map.put("appCmdCode2", 1);
+        Gson gson = new Gson();
+        String json = gson.toJson(map);
+        MyApplication.tcpClient.send(Constants.ACTION_SUB_PRE_TEMP, json);
     }
 
     /**
      * 提高预设水温
      */
     private void addPreTemp() {
-        String cmd = "\"appCmdCode1\":0,\"appCmdCode2\":0";
-        MyApplication.tcpClient.send(Constants.ACTION_ADD_PRE_TEMP, cmd);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("appCmdCode1", 0);
+        map.put("appCmdCode2", 0);
+        Gson gson = new Gson();
+        String json = gson.toJson(map);
+        MyApplication.tcpClient.send(Constants.ACTION_ADD_PRE_TEMP, json);
     }
 
     /**
      * 让热水器进入睡眠模式
      */
     private void sleep() {
-        String cmd = "\"appCmdCode1\":3,\"appCmdCode2\":3";
-        MyApplication.tcpClient.send(Constants.ACTION_SLEEP, cmd);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("appCmdCode1", 3);
+        map.put("appCmdCode2", 3);
+        Gson gson = new Gson();
+        String json = gson.toJson(map);
+
+        MyApplication.tcpClient.send(Constants.ACTION_SLEEP, json);
     }
 
     /**
      * 5. 唤醒热水器
      */
     private void aware() {
-        String cmd = "\"appCmdCode1\":4,\"appCmdCode2\":4";
-        MyApplication.tcpClient.send(Constants.ACTION_AWARE, cmd);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("appCmdCode1", 4);
+        map.put("appCmdCode2", 4);
+        Gson gson = new Gson();
+        String json = gson.toJson(map);
+        MyApplication.tcpClient.send(Constants.ACTION_AWARE, json);
     }
 
     private class MyBroadcastReceiver extends BroadcastReceiver {
@@ -170,25 +204,93 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String mAction = intent.getAction();
             switch (mAction) {
                 case Constants.ACTION_AWARE:
-                    Toast.makeText(MainActivity.this, "唤醒：" + msg, Toast.LENGTH_SHORT).show();
+                    handleCommonResult("唤醒", msg);
+//                    Toast.makeText(MainActivity.this, "唤醒：" + msg, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.ACTION_SLEEP:
-                    Toast.makeText(MainActivity.this, "睡眠：" + msg, Toast.LENGTH_SHORT).show();
+                    handleCommonResult("睡眠", msg);
+//                    Toast.makeText(MainActivity.this, "睡眠：" + msg, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.ACTION_ADD_PRE_TEMP:
-                    Toast.makeText(MainActivity.this, "提高预设温度：" + msg, Toast.LENGTH_SHORT).show();
+                    handleCommonResult("提高", msg);
+//                    Toast.makeText(MainActivity.this, "提高预设温度：" + msg, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.ACTION_SUB_PRE_TEMP:
-                    Toast.makeText(MainActivity.this, "降低预设温度：" + msg, Toast.LENGTH_SHORT).show();
+                    handleCommonResult("降低", msg);
+//                    Toast.makeText(MainActivity.this, "降低预设温度：" + msg, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.ACTION_STATE:
-                    Toast.makeText(MainActivity.this, "最新状态：" + msg, Toast.LENGTH_SHORT).show();
+                    setStatus(msg);
+//                    Toast.makeText(MainActivity.this, "最新状态：" + msg, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.ACTION_REPORT_TROUBLE:
-                    Toast.makeText(MainActivity.this, "上报维修：" + msg, Toast.LENGTH_SHORT).show();
+                    handleCommonResult("维修", msg);
+//                    Toast.makeText(MainActivity.this, "上报维修：" + msg, Toast.LENGTH_SHORT).show();
                     break;
             }
         }
+    }
+
+    private void handleCommonResult(String type, String msg) {
+        Gson gson = new Gson();
+        CommonResult commonResult = gson.fromJson(msg, CommonResult.class);
+        switch (type) {
+            case "提高":
+                if (commonResult.appCmdReplayCode1 == 0) {
+                    tv_pre_temp.setText(String.valueOf(commonResult.maxTemp));
+                } else {
+                    Toast.makeText(this, "降低预设温度失败", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case "降低":
+                if (commonResult.appCmdReplayCode1 == 0) {
+                    tv_pre_temp.setText(String.valueOf(commonResult.maxTemp));
+                } else {
+                    Toast.makeText(this, "降低预设温度失败", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case "睡眠":
+                if (commonResult.appCmdReplayCode1 == 0) {
+                    Toast.makeText(this, "进入睡眠成功", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "进入睡眠失败", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case "唤醒":
+                if (commonResult.appCmdReplayCode1 == 0) {
+                    Toast.makeText(this, "唤醒成功", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "唤醒失败", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case "维修":
+                if (commonResult.appCmdReplayCode1 == 0) {
+                    Toast.makeText(this, "上报维修成功", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "上报维修失败", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+
+    }
+
+    /**
+     * 最新状态
+     *
+     * @param msg
+     */
+    private void setStatus(String msg) {
+        try {
+            Gson gson = new Gson();
+            ResultStatus status = gson.fromJson(msg, ResultStatus.class);
+            tv_tds.setText(String.valueOf(status.waterTDS));
+            tv_level.setText(status.waterLevel);
+            tv_temp.setText(String.valueOf(status.waterTemp));
+            tv_pre_temp.setText(String.valueOf(status.maxTemp));
+        } catch (Exception e) {
+            Toast.makeText(this, "数据解析异常", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 

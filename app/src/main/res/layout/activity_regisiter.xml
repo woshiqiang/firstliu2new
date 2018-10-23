@@ -61,6 +61,34 @@
         android:textColor="#ffffff"
         android:textColorHint="#a3a3a3"
         android:textSize="14sp"/>
+    <EditText
+        android:id="@+id/et_name"
+        android:layout_width="fill_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="35dp"
+        android:layout_marginRight="35dp"
+        android:gravity="center_vertical"
+        android:hint="请输入姓名"
+        android:paddingLeft="8dp"
+        android:singleLine="true"
+        android:textColor="@android:color/white"
+        android:textColorHint="#a3a3a3"
+        android:textSize="14sp"/>
+    <EditText
+        android:id="@+id/et_serial_num"
+        android:layout_width="fill_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="35dp"
+        android:layout_marginRight="35dp"
+        android:gravity="center_vertical"
+        android:hint="请输入序列号"
+        android:paddingLeft="8dp"
+        android:singleLine="true"
+        android:textColor="@android:color/white"
+        android:textColorHint="#a3a3a3"
+        android:textSize="14sp"/>
     <Button
         android:id="@+id/btn_register"
         android:layout_width="fill_parent"

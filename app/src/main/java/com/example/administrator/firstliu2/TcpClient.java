@@ -53,12 +53,13 @@ public class TcpClient implements Runnable {
             is = socket.getInputStream();
             dis = new DataInputStream(is);
         } catch (IOException e) {
+            Log.e("TcpClient", "连接失败");
             e.printStackTrace();
         }
         while (isRun) {
             try {
                 rcvLen = dis.read(buff);
-                rcvMsg = new String(buff, 0, rcvLen, "GBK");
+                rcvMsg = new String(buff, 0, rcvLen, "UTF-8");
                 Log.i(TAG, "run: 收到消息:" + rcvMsg);
                 Intent intent = new Intent();
                 intent.setAction(action);

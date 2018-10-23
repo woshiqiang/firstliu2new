@@ -9,6 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+
 public class WiFiActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText et_pwd;
@@ -26,13 +30,16 @@ public class WiFiActivity extends AppCompatActivity implements View.OnClickListe
     private void sendData() {
         String pwd = et_pwd.getText().toString().trim();
         if (TextUtils.isEmpty(pwd)) {
-            Toast.makeText(this, "密码", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "密码不能为空", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        String cmd = "\"appCmdCode1\":8,\"appCmdCode2\":8";
-        MyApplication.tcpClient2.send(Constants.ACTION_WIFI, cmd);
-
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("appCmdCode1", 8);
+        map.put("appCmdCode2", 8);
+        Gson gson = new Gson();
+        String json = gson.toJson(map);
+        MyApplication.tcpClient2.send(Constants.ACTION_WIFI, json);
+        Toast.makeText(this, "发送成功", Toast.LENGTH_SHORT).show();
     }
 
     private void initView() {

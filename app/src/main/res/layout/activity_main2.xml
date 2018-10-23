@@ -85,7 +85,10 @@
                     android:id="@+id/tv_pre_temp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:background="@drawable/text_shape"
+                    android:padding="5dp"
+                    android:textColor="#000" />
 
             </LinearLayout>
             <!--水温-->
@@ -106,7 +109,10 @@
                     android:id="@+id/tv_temp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:background="@drawable/text_shape"
+                    android:padding="5dp"
+                    android:textColor="#000" />
 
             </LinearLayout>
             <!--TDS-->
@@ -127,7 +133,10 @@
                     android:id="@+id/tv_tds"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:background="@drawable/text_shape"
+                    android:padding="5dp"
+                    android:textColor="#000" />
 
             </LinearLayout>
 
@@ -149,7 +158,10 @@
                     android:id="@+id/tv_level"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:background="@drawable/text_shape"
+                    android:padding="5dp"
+                    android:textColor="#000" />
 
             </LinearLayout>
 

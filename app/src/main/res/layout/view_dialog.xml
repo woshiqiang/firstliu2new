@@ -5,6 +5,14 @@
     android:orientation="vertical">
 
     <EditText
+        android:id="@+id/et_dialog_location"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入位置">
+
+        <requestFocus></requestFocus>
+    </EditText>
+    <EditText
         android:id="@+id/et_dialog_trouble"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
